@@ -33,12 +33,13 @@ export function createSession(bookId, name, sessionNumber = 1, startPage = 1) {
   }
 }
 
-export function createDecision({ fromPage, choice, toPage }) {
+export function createDecision({ fromPage, choice, toPage, isRedirect = false }) {
   return {
     id: generateId(),
     fromPage: Number(fromPage),
     choice: choice || '',
     toPage: Number(toPage),
+    isRedirect: Boolean(isRedirect),
     timestamp: new Date().toISOString(),
   }
 }

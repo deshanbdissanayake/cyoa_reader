@@ -19,7 +19,7 @@ export default function Home({ navigate }) {
       <div className="page-header">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h1 className="text-xl font-bold text-stone-800">PathTracker</h1>
+            <h1 className="text-xl font-bold text-stone-800">Path Tracker</h1>
             <p className="text-xs text-stone-400 mt-0.5">
               {books.length} {books.length === 1 ? 'book' : 'books'} on your shelf
             </p>
@@ -48,7 +48,7 @@ export default function Home({ navigate }) {
           <EmptyState
             emoji="📚"
             title="Your shelf is empty"
-            description="Add your first CYOA book to start tracking your adventures and discovering every ending."
+            description="Add your first Interactive thriller novel book to start tracking your adventures and discovering every ending."
             action={
               <button
                 onClick={() => navigate('add-book')}

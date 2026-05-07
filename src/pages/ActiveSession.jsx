@@ -11,6 +11,7 @@ export default function ActiveSession({ navigate, params }) {
   const session = sessions.find(s => s.id === params?.sessionId)
 
   const [showDecision, setShowDecision]   = useState(false)
+  const [isRedirect, setIsRedirect]       = useState(false)
   const [jumpToPage, setJumpToPage]       = useState('')
   const [choiceText, setChoiceText]       = useState('')
   const [formError, setFormError]         = useState('')
@@ -44,6 +45,7 @@ export default function ActiveSession({ navigate, params }) {
     setJumpToPage('')
     setChoiceText('')
     setFormError('')
+    setIsRedirect(false)
     setShowDecision(true)
   }
 
@@ -52,7 +54,7 @@ export default function ActiveSession({ navigate, params }) {
     if (!jumpToPage) { setFormError('"Jump to page" is required'); return }
     const toN = Number(jumpToPage)
     if (isNaN(toN) || toN < 1) { setFormError('Enter a valid page number'); return }
-    addDecision(session.id, { fromPage: String(currentPage), choice: choiceText, toPage: String(toN) })
+    addDecision(session.id, { fromPage: String(currentPage), choice: choiceText, toPage: String(toN), isRedirect })
     updateCurrentPage(session.id, toN)
     setShowDecision(false)
     setJumpToPage('')
@@ -150,15 +152,30 @@ export default function ActiveSession({ navigate, params }) {
             <div className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-sm font-semibold text-stone-700 flex items-center gap-2">
-                  <GitBranch size={15} style={{ color: book.coverColor }} />
-                  Decision on p.{currentPage}
+                  <GitBranch size={15} style={{ color: isRedirect ? '#78716c' : book.coverColor }} />
+                  {isRedirect ? 'Go-to' : 'Decision'} on p.{currentPage}
                 </h2>
-                <button
-                  onClick={() => setShowDecision(false)}
-                  className="text-xs text-stone-400 active:opacity-60"
-                >
+                <button onClick={() => setShowDecision(false)} className="text-xs text-stone-400 active:opacity-60">
                   Cancel
                 </button>
+              </div>
+
+              {/* Type toggle */}
+              <div className="flex rounded-xl bg-amber-100 p-0.5 gap-0.5 mb-3">
+                {[
+                  { label: 'Decision (choice)', val: false },
+                  { label: 'Go-to (no choice)', val: true },
+                ].map(({ label, val }) => (
+                  <button
+                    key={String(val)}
+                    onClick={() => setIsRedirect(val)}
+                    className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      isRedirect === val ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-500'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
 
               <div className="flex gap-2 mb-3">
@@ -183,27 +200,29 @@ export default function ActiveSession({ navigate, params }) {
                 </div>
               </div>
 
-              <div className="mb-3">
-                <label className="text-xs text-stone-400 mb-1 block">You chose (optional)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Took the left tunnel"
-                  value={choiceText}
-                  onChange={e => setChoiceText(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') handleLogDecision() }}
-                  className="input-field"
-                />
-              </div>
+              {!isRedirect && (
+                <div className="mb-3">
+                  <label className="text-xs text-stone-400 mb-1 block">You chose (optional)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Took the left tunnel"
+                    value={choiceText}
+                    onChange={e => setChoiceText(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') handleLogDecision() }}
+                    className="input-field"
+                  />
+                </div>
+              )}
 
               {formError && <p className="text-xs text-red-500 mb-2">{formError}</p>}
 
               <button
                 onClick={handleLogDecision}
                 className="w-full h-11 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
-                style={{ backgroundColor: book.coverColor }}
+                style={{ backgroundColor: isRedirect ? '#78716c' : book.coverColor }}
               >
                 <GitBranch size={14} />
-                Log &amp; Jump
+                {isRedirect ? 'Log Go-to & Jump' : 'Log Decision & Jump'}
               </button>
             </div>
           </div>
@@ -261,6 +280,9 @@ export default function ActiveSession({ navigate, params }) {
                         <span className="font-semibold text-stone-700">p.{d.fromPage}</span>
                         <ArrowRight size={10} />
                         <span className="font-semibold text-stone-700">p.{d.toPage}</span>
+                        {d.isRedirect && (
+                          <span className="ml-1 text-xs text-stone-400 bg-stone-100 rounded px-1.5 py-0.5">go-to</span>
+                        )}
                       </div>
                       {d.choice && <p className="text-sm text-stone-600 leading-snug mt-0.5">{d.choice}</p>}
                     </div>

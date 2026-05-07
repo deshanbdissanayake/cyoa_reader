@@ -143,8 +143,8 @@ export default function Settings() {
               <BookOpen size={18} className="text-amber-50" />
             </div>
             <div>
-              <p className="font-semibold text-stone-800 text-sm">PathTracker</p>
-              <p className="text-xs text-stone-400">v1.0 · Your CYOA companion</p>
+              <p className="font-semibold text-stone-800 text-sm">Path Tracker - by Alura Books</p>
+              <p className="text-xs text-stone-400">v1.0 · Your Interactive thriller novel companion</p>
             </div>
           </div>
           <p className="text-xs text-stone-400 leading-relaxed">

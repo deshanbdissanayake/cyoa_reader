@@ -11,14 +11,18 @@ function buildGraph(sessions) {
   const edgeMap = new Map()
 
   const upsertNode = (id, data) => {
-    if (!nodeMap.has(id)) nodeMap.set(id, { id, ...data })
+    if (!nodeMap.has(id)) {
+      nodeMap.set(id, { id, ...data })
+    } else if (data.type === 'decision') {
+      nodeMap.get(id).type = 'decision'
+    }
   }
-  const upsertEdge = (from, to, label = '', reading = false) => {
+  const upsertEdge = (from, to, label = '', reading = false, redirect = false) => {
     const key = `${from}|${to}`
     if (edgeMap.has(key)) {
       edgeMap.get(key).count++
     } else {
-      edgeMap.set(key, { id: key, from, to, label, reading, count: 1 })
+      edgeMap.set(key, { id: key, from, to, label, reading, redirect, count: 1 })
     }
   }
 
@@ -34,15 +38,15 @@ function buildGraph(sessions) {
       const fromId = fp === 1 ? 'start' : `p${fp}`
       const toId   = `p${tp}`
 
-      upsertNode(fromId, { label: `p.${fp}`, type: 'decision', page: fp })
-      upsertNode(toId,   { label: `p.${tp}`, type: 'page',     page: tp })
+      upsertNode(fromId, { label: `p.${fp}`, type: d.isRedirect ? 'page' : 'decision', page: fp })
+      upsertNode(toId,   { label: `p.${tp}`, type: 'page', page: tp })
 
       // Reading gap between previous position and this choice page
       if (prevId !== fromId) {
         upsertEdge(prevId, fromId, '', true)
       }
 
-      upsertEdge(fromId, toId, d.choice || '', false)
+      upsertEdge(fromId, toId, d.choice || '', false, d.isRedirect || false)
       prevId = toId
     }
 
@@ -170,10 +174,10 @@ function FlowChart({ sessions, bookColor, onNodeClick }) {
                 <path
                   d={pathD}
                   fill="none"
-                  stroke={bookColor}
+                  stroke={e.redirect ? '#a8a29e' : bookColor}
                   strokeWidth={e.count > 1 ? 3 : 1.5}
-                  strokeOpacity={e.reading ? 0.28 : 0.72}
-                  strokeDasharray={e.reading ? '5 3' : undefined}
+                  strokeOpacity={e.reading ? 0.28 : e.redirect ? 0.55 : 0.72}
+                  strokeDasharray={e.reading ? '5 3' : e.redirect ? '2 3' : undefined}
                   markerEnd={`url(#${mid})`}
                 />
                 {trunc && !e.reading && (
@@ -348,6 +352,10 @@ export default function PathsMap({ navigate, params }) {
                 <span className="flex items-center gap-1.5">
                   <span className="inline-block w-6 h-0.5 rounded" style={{ backgroundColor: book.coverColor, opacity: 0.75 }} />
                   <span className="text-xs text-stone-400">Choice</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block w-6 h-0" style={{ borderTop: '2px dotted #a8a29e' }} />
+                  <span className="text-xs text-stone-400">Go-to</span>
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span className="inline-block w-6 h-0" style={{ borderTop: `2px dashed ${book.coverColor}55` }} />
