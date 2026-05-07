@@ -128,7 +128,7 @@ export default function AddBook({ navigate }) {
             <div>
               <label className="section-label block mb-2">Total Pages</label>
               <input
-                type="number"
+                type="number" onWheel={e => e.target.blur()}
                 placeholder="e.g. 322"
                 value={form.totalPages}
                 onChange={e => set('totalPages', e.target.value)}
@@ -140,7 +140,7 @@ export default function AddBook({ navigate }) {
             <div>
               <label className="section-label block mb-2">Total Endings</label>
               <input
-                type="number"
+                type="number" onWheel={e => e.target.blur()}
                 placeholder="e.g. 31"
                 value={form.totalEndings}
                 onChange={e => set('totalEndings', e.target.value)}

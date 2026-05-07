@@ -99,7 +99,7 @@ export default function ActiveSession({ navigate, params }) {
             <p className="text-xs text-stone-400 text-center mb-4">Current Page</p>
             {pageEditing ? (
               <input
-                type="number"
+                type="number" onWheel={e => e.target.blur()}
                 value={pageInput}
                 min={1}
                 autoFocus
@@ -171,7 +171,7 @@ export default function ActiveSession({ navigate, params }) {
                 <div className="flex-1">
                   <label className="text-xs text-stone-400 mb-1 block">Jump to page *</label>
                   <input
-                    type="number"
+                    type="number" onWheel={e => e.target.blur()}
                     placeholder="e.g. 45"
                     value={jumpToPage}
                     onChange={e => setJumpToPage(e.target.value)}
@@ -289,7 +289,7 @@ export default function ActiveSession({ navigate, params }) {
             <div>
               <label className="section-label block mb-2">Ending Number (optional)</label>
               <input
-                type="number"
+                type="number" onWheel={e => e.target.blur()}
                 placeholder={`1 – ${book.totalEndings}`}
                 value={endingNumber}
                 onChange={e => setEndingNumber(e.target.value)}
