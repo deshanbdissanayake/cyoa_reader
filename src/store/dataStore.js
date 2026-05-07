@@ -17,14 +17,15 @@ export function createBook({ title, author, coverColor, coverEmoji, totalPages, 
   }
 }
 
-export function createSession(bookId, name) {
+export function createSession(bookId, name, sessionNumber = 1, startPage = 1) {
   return {
     id: generateId(),
     bookId,
-    name: name || `Session ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`,
+    name: name || `Session ${sessionNumber}`,
     startedAt: new Date().toISOString(),
     endedAt: null,
-    currentPage: 1,
+    startPage: Number(startPage) || 1,
+    currentPage: Number(startPage) || 1,
     decisions: [],
     notes: '',
     endingFound: null,

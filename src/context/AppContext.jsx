@@ -40,10 +40,14 @@ export function AppProvider({ children }) {
   }, [setBooks])
 
   // --- Sessions ---
-  const startSession = useCallback((bookId, name) => {
-    const session = createSession(bookId, name)
-    setSessions(prev => [session, ...prev])
-    return session
+  const startSession = useCallback((bookId, name, startPage = 1) => {
+    const id = generateId()
+    setSessions(prev => {
+      const bookSessionCount = prev.filter(s => s.bookId === bookId).length
+      const session = createSession(bookId, name, bookSessionCount + 1, startPage)
+      return [{ ...session, id }, ...prev]
+    })
+    return { id }
   }, [setSessions])
 
   const updateSession = useCallback((sessionId, data) => {

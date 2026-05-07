@@ -12,7 +12,8 @@
       "Bash(npx vite *)",
       "mcp__Claude_in_Chrome__tabs_create_mcp",
       "Bash(netstat -ano)",
-      "Bash(findstr :5173)"
+      "Bash(findstr :5173)",
+      "Bash(node_modules\\\\.bin\\\\vite build *)"
     ]
   }
 }

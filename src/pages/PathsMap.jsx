@@ -1,6 +1,8 @@
-import { ChevronLeft, ChevronRight, GitBranch } from 'lucide-react'
+import { useState } from 'react'
+import { ChevronLeft, ChevronRight, GitBranch, Play } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import EmptyState from '../components/EmptyState'
+import Modal from '../components/Modal'
 
 // ─── Graph building ────────────────────────────────────────────────────────────
 
@@ -23,7 +25,8 @@ function buildGraph(sessions) {
   upsertNode('start', { label: 'p.1', sub: 'Start', type: 'start', page: 1 })
 
   for (const session of sessions) {
-    let prevId = 'start'
+    const sessionStartPage = Number(session.startPage) || 1
+    let prevId = sessionStartPage === 1 ? 'start' : `p${sessionStartPage}`
 
     for (const d of session.decisions) {
       const fp     = Number(d.fromPage)
@@ -119,7 +122,7 @@ function computeLayout(nodes, edges) {
 
 // ─── SVG Flowchart ─────────────────────────────────────────────────────────────
 
-function FlowChart({ sessions, bookColor }) {
+function FlowChart({ sessions, bookColor, onNodeClick }) {
   const { nodes, edges } = buildGraph(sessions)
   const { pos, svgW, svgH, cx, NODE_W, NODE_H, PAD } = computeLayout(nodes, edges)
   const mid = `arr${bookColor.replace(/[^a-z0-9]/gi, '').slice(0, 6)}`
@@ -202,8 +205,14 @@ function FlowChart({ sessions, bookColor }) {
             const textCol   = isStart ? 'white'   : isEnding ? 'white'   : bookColor
             const overlayOp = isDecision ? 0.13 : 0
 
+            const isClickable = node.type !== 'ending' && node.page !== Infinity
             return (
-              <g key={node.id} transform={`translate(${p.x}, ${p.y})`}>
+              <g
+                key={node.id}
+                transform={`translate(${p.x}, ${p.y})`}
+                onClick={isClickable ? () => onNodeClick(node) : undefined}
+                style={isClickable ? { cursor: 'pointer' } : undefined}
+              >
                 {/* Shadow */}
                 <rect width={NODE_W} height={NODE_H} rx={7} ry={7}
                   fill="#00000010" transform="translate(0,1.5)" />
@@ -252,8 +261,22 @@ function FlowChart({ sessions, bookColor }) {
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function PathsMap({ navigate, params }) {
-  const { books, getBookSessions } = useApp()
+  const { books, getBookSessions, startSession } = useApp()
   const book = books.find(b => b.id === params?.bookId)
+
+  const [selectedNode, setSelectedNode] = useState(null)
+  const [sessionName, setSessionName]   = useState('')
+
+  const handleNodeClick = (node) => {
+    setSelectedNode(node)
+    setSessionName('')
+  }
+
+  const handleStartFromNode = () => {
+    const session = startSession(book.id, sessionName.trim() || undefined, selectedNode.page)
+    setSelectedNode(null)
+    navigate('active-session', { bookId: book.id, sessionId: session.id })
+  }
 
   if (!book) {
     return (
@@ -319,7 +342,7 @@ export default function PathsMap({ navigate, params }) {
             />
           ) : (
             <div className="card p-4">
-              <FlowChart sessions={completedSessions} bookColor={book.coverColor} />
+              <FlowChart sessions={completedSessions} bookColor={book.coverColor} onNodeClick={handleNodeClick} />
               {/* Legend */}
               <div className="flex flex-wrap items-center gap-4 mt-4 pt-3 border-t border-amber-100">
                 <span className="flex items-center gap-1.5">
@@ -368,6 +391,34 @@ export default function PathsMap({ navigate, params }) {
           </div>
         )}
       </div>
+
+      <Modal
+        isOpen={!!selectedNode}
+        onClose={() => setSelectedNode(null)}
+        title={`Start from p.${selectedNode?.page}`}
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-stone-600">
+            A new session will begin at <strong>page {selectedNode?.page}</strong>. You can continue reading from there.
+          </p>
+          <div>
+            <label className="section-label block mb-2">Session Name (optional)</label>
+            <input
+              type="text"
+              placeholder="Leave blank to auto-name"
+              value={sessionName}
+              onChange={e => setSessionName(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleStartFromNode() }}
+              className="input-field"
+              autoFocus
+            />
+          </div>
+          <button onClick={handleStartFromNode} className="btn-primary flex items-center justify-center gap-2">
+            <Play size={15} fill="currentColor" />
+            Start Session from p.{selectedNode?.page}
+          </button>
+        </div>
+      </Modal>
     </div>
   )
 }

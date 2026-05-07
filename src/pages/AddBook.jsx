@@ -105,7 +105,7 @@ export default function AddBook({ navigate }) {
             <label className="section-label block mb-2">Book Title *</label>
             <input
               type="text"
-              placeholder="e.g. Cave of Time"
+              placeholder="e.g. The Hiker"
               value={form.title}
               onChange={e => set('title', e.target.value)}
               className={`input-field ${errors.title ? 'border-red-300 ring-1 ring-red-200' : ''}`}
@@ -117,7 +117,7 @@ export default function AddBook({ navigate }) {
             <label className="section-label block mb-2">Author</label>
             <input
               type="text"
-              placeholder="e.g. Edward Packard"
+              placeholder="e.g. Deshan B. Dissanayake"
               value={form.author}
               onChange={e => set('author', e.target.value)}
               className="input-field"
@@ -129,7 +129,7 @@ export default function AddBook({ navigate }) {
               <label className="section-label block mb-2">Total Pages</label>
               <input
                 type="number"
-                placeholder="e.g. 117"
+                placeholder="e.g. 322"
                 value={form.totalPages}
                 onChange={e => set('totalPages', e.target.value)}
                 min={1}
