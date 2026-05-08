@@ -269,15 +269,11 @@ export default function PathsMap({ navigate, params }) {
   const book = books.find(b => b.id === params?.bookId)
 
   const [selectedNode, setSelectedNode] = useState(null)
-  const [sessionName, setSessionName]   = useState('')
 
-  const handleNodeClick = (node) => {
-    setSelectedNode(node)
-    setSessionName('')
-  }
+  const handleNodeClick = (node) => setSelectedNode(node)
 
   const handleStartFromNode = () => {
-    const session = startSession(book.id, sessionName.trim() || undefined, selectedNode.page)
+    const session = startSession(book.id, undefined, selectedNode.page)
     setSelectedNode(null)
     navigate('active-session', { bookId: book.id, sessionId: session.id })
   }
@@ -407,20 +403,8 @@ export default function PathsMap({ navigate, params }) {
       >
         <div className="flex flex-col gap-4">
           <p className="text-sm text-stone-600">
-            A new session will begin at <strong>page {selectedNode?.page}</strong>. You can continue reading from there.
+            A new session will begin at <strong>page {selectedNode?.page}</strong> and be named automatically.
           </p>
-          <div>
-            <label className="section-label block mb-2">Session Name (optional)</label>
-            <input
-              type="text"
-              placeholder="Leave blank to auto-name"
-              value={sessionName}
-              onChange={e => setSessionName(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') handleStartFromNode() }}
-              className="input-field"
-              autoFocus
-            />
-          </div>
           <button onClick={handleStartFromNode} className="btn-primary flex items-center justify-center gap-2">
             <Play size={15} fill="currentColor" />
             Start Session from p.{selectedNode?.page}

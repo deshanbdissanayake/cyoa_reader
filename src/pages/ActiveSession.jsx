@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ChevronLeft, ArrowRight, Trash2, Flag, FileText, ChevronDown, ChevronUp, GitBranch, ChevronRight } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import EmptyState from '../components/EmptyState'
@@ -20,6 +20,18 @@ export default function ActiveSession({ navigate, params }) {
   const [endingNumber, setEndingNumber]   = useState('')
   const [pageEditing, setPageEditing]     = useState(false)
   const [pageInput, setPageInput]         = useState('')
+  const jumpInputRef                      = useRef(null)
+
+  // Scroll jump-to input into view when decision panel opens (mobile keyboard fix)
+  useEffect(() => {
+    if (showDecision) {
+      const timer = setTimeout(() => {
+        jumpInputRef.current?.focus()
+        jumpInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [showDecision])
 
   if (!book || !session) {
     return (
@@ -132,8 +144,7 @@ export default function ActiveSession({ navigate, params }) {
               </button>
               <button
                 onClick={goNext}
-                className="flex-1 h-12 rounded-xl text-white font-bold text-base flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-sm"
-                style={{ backgroundColor: book.coverColor }}
+                className="flex-1 h-12 rounded-xl bg-stone-800 text-amber-50 font-bold text-base flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-sm"
               >
                 Next Page
                 <ChevronRight size={18} />
@@ -188,6 +199,7 @@ export default function ActiveSession({ navigate, params }) {
                 <div className="flex-1">
                   <label className="text-xs text-stone-400 mb-1 block">Jump to page *</label>
                   <input
+                    ref={jumpInputRef}
                     type="number" onWheel={e => e.target.blur()}
                     placeholder="e.g. 45"
                     value={jumpToPage}
@@ -195,7 +207,6 @@ export default function ActiveSession({ navigate, params }) {
                     onKeyDown={e => { if (e.key === 'Enter') handleLogDecision() }}
                     className="input-field text-center"
                     min={1}
-                    autoFocus
                   />
                 </div>
               </div>
@@ -218,8 +229,7 @@ export default function ActiveSession({ navigate, params }) {
 
               <button
                 onClick={handleLogDecision}
-                className="w-full h-11 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
-                style={{ backgroundColor: isRedirect ? '#78716c' : book.coverColor }}
+                className="w-full h-11 rounded-xl bg-stone-800 text-amber-50 font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
               >
                 <GitBranch size={14} />
                 {isRedirect ? 'Log Go-to & Jump' : 'Log Decision & Jump'}

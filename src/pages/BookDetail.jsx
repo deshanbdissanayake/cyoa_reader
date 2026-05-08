@@ -6,7 +6,9 @@ import EmptyState from '../components/EmptyState'
 import Modal from '../components/Modal'
 
 function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  const d = new Date(iso)
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    + ' · ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 }
 
 function SessionRow({ session, onView, onDelete }) {
@@ -63,8 +65,6 @@ export default function BookDetail({ navigate, params }) {
   const { books, getBookSessions, getEndingsFoundCount, getActiveSession, startSession, deleteSession, deleteBook } = useApp()
   const book = books.find(b => b.id === params?.bookId)
 
-  const [showNewSession, setShowNewSession] = useState(false)
-  const [sessionName, setSessionName] = useState('')
   const [showDeleteBook, setShowDeleteBook] = useState(false)
   const [deleteSessionId, setDeleteSessionId] = useState(null)
 
@@ -83,9 +83,7 @@ export default function BookDetail({ navigate, params }) {
   const pct = book.totalEndings > 0 ? Math.round((foundCount / book.totalEndings) * 100) : 0
 
   const handleStartSession = () => {
-    const session = startSession(book.id, sessionName.trim() || undefined)
-    setShowNewSession(false)
-    setSessionName('')
+    const session = startSession(book.id)
     navigate('active-session', { bookId: book.id, sessionId: session.id })
   }
 
@@ -186,7 +184,7 @@ export default function BookDetail({ navigate, params }) {
             </button>
           ) : (
             <button
-              onClick={() => setShowNewSession(true)}
+              onClick={handleStartSession}
               className="btn-primary flex items-center justify-center gap-2 col-span-2"
             >
               <Plus size={18} />
@@ -234,7 +232,7 @@ export default function BookDetail({ navigate, params }) {
               title="No sessions yet"
               description="Start a new session to begin tracking your path through the book."
               action={
-                <button onClick={() => setShowNewSession(true)} className="btn-secondary">
+                <button onClick={handleStartSession} className="btn-secondary">
                   Start First Session
                 </button>
               }
@@ -253,27 +251,6 @@ export default function BookDetail({ navigate, params }) {
           )}
         </div>
       </div>
-
-      {/* New session modal */}
-      <Modal isOpen={showNewSession} onClose={() => setShowNewSession(false)} title="New Session">
-        <div className="flex flex-col gap-4">
-          <div>
-            <label className="section-label block mb-2">Session Name (optional)</label>
-            <input
-              type="text"
-              placeholder={`Session ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
-              value={sessionName}
-              onChange={e => setSessionName(e.target.value)}
-              className="input-field"
-              autoFocus
-            />
-          </div>
-          <button onClick={handleStartSession} className="btn-primary flex items-center justify-center gap-2">
-            <Play size={16} fill="currentColor" />
-            Start Reading
-          </button>
-        </div>
-      </Modal>
 
       {/* Delete session confirm */}
       <Modal isOpen={!!deleteSessionId} onClose={() => setDeleteSessionId(null)} title="Delete Session?">
